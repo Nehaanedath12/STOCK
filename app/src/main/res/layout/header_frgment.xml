@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="5dp"
+        android:elevation="6dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="30dp"
+            android:focusable="false"
+            android:textSize="16sp"
+            android:id="@+id/voucher_no"
+            android:textColor="@color/black"
+            android:layout_gravity="center_horizontal"
+            android:text="Voucher number : " />
+
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            >
+            <EditText
+                android:id="@+id/date"
+                android:background="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:ems="12"
+                android:focusable="false"
+                android:hint="Date"
+                android:drawableEnd="@drawable/ic_date" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            >
+            <EditText
+                android:background="@color/white"
+                android:id="@+id/stock_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:ems="12"
+                android:focusable="false"
+                android:hint="Stock Count Date"
+                android:drawableEnd="@drawable/ic_date" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginTop="10dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select warehouse"
+                android:layout_marginStart="10dp"
+                android:fontFamily="sans-serif-light" />
+
+            <Spinner
+                android:id="@+id/warehouseSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:ems="12"
+                android:gravity="center"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/narration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginTop="20sp"
+            android:layout_marginBottom="40dp"
+            android:ems="12"
+            android:hint="Narration"
+            android:maxLength="50" />
+    </LinearLayout>
+
+</LinearLayout>
