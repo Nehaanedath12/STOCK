@@ -83,7 +83,7 @@ public class GetProductService extends JobService {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         Product p=new Product();
-                        p.setMasterId(jsonObject.getString("MasterId"));
+                        p.setMasterId(jsonObject.getInt("MasterId"));
                         p.setCode(jsonObject.getString("Code"));
                         p.setName(jsonObject.getString("Name"));
                         p.setBarcode(jsonObject.getString("Barcode"));

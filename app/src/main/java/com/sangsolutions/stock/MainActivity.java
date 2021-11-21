@@ -1,11 +1,14 @@
 package com.sangsolutions.stock;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -13,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sangsolutions.stock.Database.DatabaseHelper;
 import com.sangsolutions.stock.StockAllocation.StockAllocationHistoryActivity;
 import com.sangsolutions.stock.databinding.ActivityMainBinding;
 
@@ -24,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     MainMenuAdapter menuAdapter;
     List<MainMenu> list;
+    DatabaseHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         list = new ArrayList<>();
         menuAdapter = new MainMenuAdapter(list);
+        helper=new DatabaseHelper(this);
 
         list.add(new MainMenu(R.drawable.ic_sync, "Sync"));
         list.add(new MainMenu(R.drawable.ic_stock_count, "Stock Count"));
@@ -59,6 +65,29 @@ public class MainActivity extends AppCompatActivity {
 
 
             }
+
+            binding.logout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu popupMenu = new PopupMenu(MainActivity.this,view);
+                    popupMenu.inflate(R.menu.logout_menu);
+                    popupMenu.setGravity(Gravity.END);
+                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            if(item.getItemId()==R.id.logout){
+                                if(helper.DeleteCurrentUser()){
+
+                                    startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                                    finish();
+                                }
+                            }
+                            return true;
+                        }
+                    });
+                    popupMenu.show();
+                }
+            });
             
         }catch (Exception e){
             String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();

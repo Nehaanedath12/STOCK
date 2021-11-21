@@ -39,11 +39,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     //Product
-    private static final String MASTER_ID = "MasterId";
-    private static final String NAME = "Name";
-    private static final String CODE =  "Code";
-    private static final String BARCODE = "Barcode";
-    private static final String UNIT = "Unit";
 
     //PendingSO
     private static final String DOC_NO = "DocNo";
@@ -125,11 +120,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //create table Product
     private static final String CREATE_TABLE_PRODUCT = "create table if not exists  " + TABLE_PRODUCT + " (" +
-            "" + MASTER_ID + " INTEGER PRIMARY KEY ," +
-            "" + NAME + " TEXT(65) DEFAULT null ," +
-            "" + CODE + "  TEXT(40) DEFAULT null," +
-            "" + BARCODE + "  TEXT(30) DEFAULT null," +
-            "" + UNIT + " TEXT(20) DEFAULT null" +
+            "" + Product.I_ID + " INTEGER PRIMARY KEY ," +
+            "" + Product.PRODUCT + " VARCHAR(65) DEFAULT null  ," +
+            "" + Product.CODE + "  VARCHAR(50) DEFAULT null ," +
+            "" + Product.BARCODE + "  VARCHAR(30) DEFAULT null ," +
+            "" + Product.UNIT + " VARCHAR(20) DEFAULT null " +
             ")";
 
     private static final String CREATE_CURRENT_LOGIN = "create table if not exists  " + TABLE_CURRENT_LOGIN + " (" +
@@ -150,8 +145,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //create table warehouse
     private static final String CREATE_TABLE_WAREHOUSE = "create table if not exists  " + TABLE_WAREHOUSE + " (" +
-            "" + MASTER_ID + " TEXT DEFAULT null," +
-            "" + NAME + " TEXT(60) DEFAULT null" + ");";
+            "" + Warehouse.I_ID + " TEXT DEFAULT null," +
+            "" + Warehouse.WAREHOUSE + " TEXT(60) DEFAULT null" + ");";
 
 
     //create table StockCount
@@ -259,11 +254,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (int i = 0; i < productsList.size(); i++) {
             ContentValues cv = new ContentValues();
 
-            cv.put(MASTER_ID,productsList.get(i).getMasterId());
-            cv.put(NAME, productsList.get(i).getName());
-            cv.put(CODE, productsList.get(i).getCode());
-            cv.put(BARCODE, productsList.get(i).getBarcode());
-            cv.put(UNIT, productsList.get(i).getBarcode());
+            cv.put(Product.I_ID,productsList.get(i).getMasterId());
+            cv.put(Product.PRODUCT, productsList.get(i).getName());
+            cv.put(Product.CODE, productsList.get(i).getCode());
+            cv.put(Product.BARCODE, productsList.get(i).getBarcode());
+            cv.put(Product.UNIT, productsList.get(i).getUnit());
             status = db.insert(TABLE_PRODUCT, null, cv);
         }
 
@@ -279,8 +274,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (int i = 0; i < warehouseList.size(); i++) {
             ContentValues cv = new ContentValues();
 
-            cv.put(NAME,warehouseList.get(i).getName() );
-            cv.put(MASTER_ID,warehouseList.get(i).getName());
+            cv.put(Warehouse.WAREHOUSE,warehouseList.get(i).getName() );
+            cv.put(Warehouse.WAREHOUSE,warehouseList.get(i).getName());
             status = db.insert(TABLE_WAREHOUSE, null, cv);
         }
         return status != -1;
@@ -347,6 +342,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return cursor;
         }else {
             return null;
+        }
+    }
+
+    public Cursor GetProductInfo(String Keyword){
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + TABLE_PRODUCT + " where " + Product.CODE
+                + " like ? or " + Product.PRODUCT + " like ? group by " + Product.PRODUCT + " limit 10 ",
+                new String[]{Keyword + "%", Keyword + "%"});
+        if (cursor.moveToFirst()) {
+
+
+            return cursor;
+        }else {
+            return  null;
+        }
+    }
+
+    public boolean DeleteCurrentUser(){
+        this.db = getWritableDatabase();
+        float status = db.delete(TABLE_CURRENT_LOGIN,null,null);
+        return status!=-1;
+    }
+
+    public String GetProductUnit(String Barcode){
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT "+Product.UNIT+" FROM "+TABLE_PRODUCT+" WHERE "+Product.BARCODE+" = ? ",new String[]{Barcode});
+        if (cursor.moveToFirst()) {
+            return cursor.getString(cursor.getColumnIndex(Product.UNIT));
+        }else {
+            return  "";
         }
     }
 }

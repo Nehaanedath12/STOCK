@@ -62,7 +62,7 @@ public class StockCountHeaderFragment extends Fragment {
                 EditMode = getArguments().getString("EditMode");
                 iId = getArguments().getInt("voucherNo", 0);
 
-                Log.d("lllll", EditMode + " " + iId);
+                Log.d("lllllH", EditMode + " " + iId);
 
                 if (EditMode.equals("edit")) {
 //                warehouse_id = getArguments().getString("warehouse");
@@ -93,7 +93,6 @@ public class StockCountHeaderFragment extends Fragment {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     PublicData.warehouse = list.get(adapterView.getSelectedItemPosition()).getMasterId();
-                    Log.d("iWarehouse", PublicData.warehouse);
                 }
 
                 @Override

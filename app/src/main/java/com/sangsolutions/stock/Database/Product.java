@@ -2,14 +2,26 @@ package com.sangsolutions.stock.Database;
 
 public class Product {
 
-    private String MasterId,Name,Code,Barcode,Unit;
 
+    private String Name,Code,Barcode,Unit;
+    int MasterId;
 
-    public String getMasterId() {
+    public Product() {
+    }
+
+    public Product(String name, String code, String barcode, String unit, int masterId) {
+        Name = name;
+        Code = code;
+        Barcode = barcode;
+        Unit = unit;
+        MasterId = masterId;
+    }
+
+    public int getMasterId() {
         return MasterId;
     }
 
-    public void setMasterId(String masterId) {
+    public void setMasterId(int masterId) {
         MasterId = masterId;
     }
 
@@ -44,4 +56,12 @@ public class Product {
     public void setUnit(String unit) {
         Unit = unit;
     }
+
+    public static final String I_ID = "MasterId";
+    public static final String PRODUCT = "Name";
+    public static final String CODE = "Code";
+    public static final String BARCODE = "Barcode";
+    public static final String UNIT = "Unit";
+
+
 }

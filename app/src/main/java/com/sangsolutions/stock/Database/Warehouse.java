@@ -20,4 +20,8 @@ public class Warehouse {
     public void setName(String name) {
         Name = name;
     }
+
+
+    public static final String I_ID = "MasterId";
+    public static final String WAREHOUSE = "Name";
 }
