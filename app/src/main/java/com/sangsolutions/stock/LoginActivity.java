@@ -54,13 +54,13 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d("preferences1",preferences.getString(Commons.PRODUCT_FINISHED, "false")+"  "+
                         preferences.getString(Commons.WAREHOUSE_FINISHED, "false"));
+                if(!(new Tools().getIP(LoginActivity.this)).isEmpty()) {
 
                 if(preferences.getString(Commons.PRODUCT_FINISHED, "false").equals("true") &&
                         preferences.getString(Commons.WAREHOUSE_FINISHED, "false").equals("true") ){
                     if(!binding.userName.getText().toString().trim().isEmpty()) {
                         if (!binding.password.getText().toString().trim().isEmpty()) {
 
-                            if(!(new Tools().getIP(LoginActivity.this)).isEmpty()) {
                                 User u = new User();
                                 u.setsLoginName(binding.userName.getText().toString().trim());
                                 u.setsPassword(binding.password.getText().toString().trim());
@@ -83,9 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Toast.makeText(LoginActivity.this, "Check your network or IP", Toast.LENGTH_SHORT).show();
                                 }
 
-                            } else {
-                                Toast.makeText(LoginActivity.this, "Please enter IP Address", Toast.LENGTH_SHORT).show();
-                            }
+
                         }
                         else {
                             binding.password.setError("enter Password");
@@ -94,10 +92,11 @@ public class LoginActivity extends AppCompatActivity {
                     else {
                         binding.userName.setError("enter Username");
                     }
-
-
                 }else {
                     Toast.makeText(LoginActivity.this, "Sync Not Completed!", Toast.LENGTH_SHORT).show();
+                }
+                } else {
+                    Toast.makeText(LoginActivity.this, "Please enter IP Address", Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -115,21 +115,21 @@ public class BodyAdapter extends RecyclerView.Adapter<BodyAdapter.ViewHolder> {
                     onClickListener.onItemClick(productList, position);
                 }
             });
-//            holder.ll_main.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View view) {
-//                    if (onClickListener == null) return false;
-//                    else {
-//                        onClickListener.onItemLongClick(position);
-//                    }
-//                    return true;
-//                }
-//            });
+            holder.parent.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    if (onClickListener == null) return false;
+                    else {
+                        onClickListener.onItemLongClick(position);
+                    }
+                    return true;
+                }
+            });
 //        } else {
 //            holder.delete.setVisibility(View.GONE);
 //        }
-//        toggleCheckedIcon(holder, position);
-        // displayImage(holder, productList);
+        toggleCheckedIcon(holder, position);
+//         displayImage(holder, productList);
     }
 
     @Override

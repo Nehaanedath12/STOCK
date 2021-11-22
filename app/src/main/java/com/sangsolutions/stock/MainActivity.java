@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -29,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
     MainMenuAdapter menuAdapter;
     List<MainMenu> list;
     DatabaseHelper helper;
+
+
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,26 +77,31 @@ public class MainActivity extends AppCompatActivity {
             binding.logout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    PopupMenu popupMenu = new PopupMenu(MainActivity.this,view);
-                    popupMenu.inflate(R.menu.logout_menu);
-                    popupMenu.setGravity(Gravity.END);
-                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            if(item.getItemId()==R.id.logout){
-                                if(helper.DeleteCurrentUser()){
 
-                                    startActivity(new Intent(MainActivity.this,LoginActivity.class));
-                                    finish();
+                    androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Logout?")
+                            .setMessage("Do you want to Logout?")
+                            .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if(helper.DeleteCurrentUser()){
+
+                                        startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                                        finish();
+                                    }
                                 }
-                            }
-                            return true;
-                        }
-                    });
-                    popupMenu.show();
+                            })
+                            .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .create()
+                            .show();
                 }
             });
-            
+
         }catch (Exception e){
             String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();
             Tools.logWrite(fnName,e,this);

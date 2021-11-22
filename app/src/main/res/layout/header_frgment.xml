@@ -24,7 +24,7 @@
             android:id="@+id/voucher_no"
             android:textColor="@color/black"
             android:layout_gravity="center_horizontal"
-            android:text="Voucher number : " />
+             />
 
 
 
@@ -100,12 +100,11 @@
             android:id="@+id/narration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginStart="40dp"
             android:layout_marginEnd="40dp"
-            android:layout_marginTop="20sp"
             android:layout_marginBottom="40dp"
             android:ems="12"
+            android:inputType="text"
             android:hint="Narration"
             android:maxLength="50" />
     </LinearLayout>

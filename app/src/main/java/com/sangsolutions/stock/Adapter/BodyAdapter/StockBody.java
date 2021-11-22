@@ -2,9 +2,14 @@ package com.sangsolutions.stock.Adapter.BodyAdapter;
 
 @SuppressWarnings("ALL")
 public class StockBody {
+
+
     String Name,Code,Qty,Unit,iProduct,sRemarks,barcode;
 
-    public StockBody(String name, String code, String qty, String unit, String iProduct, String sRemarks,String barcode) {
+    public StockBody() {
+    }
+
+    public StockBody(String name, String code, String qty, String unit, String iProduct, String sRemarks, String barcode) {
         this.Name = name;
         this.Code = code;
         this.Qty = qty;
@@ -69,4 +74,12 @@ public class StockBody {
     public void setsRemarks(String sRemarks) {
         this.sRemarks = sRemarks;
     }
+
+    public static final String I_ID = "iId";
+    public static final String I_PRODUCT = "iProduct";
+    public static final String PRODUCT = "sProduct";
+    public static final String BARCODE = "barcode";
+    public static final String F_QTY = "fQty";
+    public static final String S_UNIT = "sUnit";
+    public static final String S_REMARKS = "sRemarks";
 }

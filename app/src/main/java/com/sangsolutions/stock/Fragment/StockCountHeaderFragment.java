@@ -3,6 +3,8 @@ package com.sangsolutions.stock.Fragment;
 import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.sangsolutions.stock.Adapter.BodyAdapter.StockHeader;
 import com.sangsolutions.stock.Database.DatabaseHelper;
 import com.sangsolutions.stock.PublicData;
 import com.sangsolutions.stock.R;
@@ -36,10 +39,10 @@ public class StockCountHeaderFragment extends Fragment {
 
     HeaderFrgmentBinding binding;
     DatabaseHelper helper;
-    String voucherNo="",Date ="",dStockCountDate="", Narration ="";
+    String voucherNo="";
     java.util.Date c;
     int iId;
-    List<Warehouse> list;
+    List<Warehouse> warehouseList;
     WarehouseAdapter adapter;
     String EditMode = "";
     SimpleDateFormat df;
@@ -54,32 +57,28 @@ public class StockCountHeaderFragment extends Fragment {
         df = new SimpleDateFormat("dd-MM-yyyy");
 
         helper=new DatabaseHelper(requireContext());
-        list = new ArrayList<>();
-        adapter = new WarehouseAdapter(list);
+        warehouseList = new ArrayList<>();
+        adapter = new WarehouseAdapter(warehouseList);
         LoadWarehouse();
         try {
             if (getArguments() != null) {
                 EditMode = getArguments().getString("EditMode");
-                iId = getArguments().getInt("voucherNo", 0);
+                iId = getArguments().getInt("iId", 0);
 
                 Log.d("lllllH", EditMode + " " + iId);
 
                 if (EditMode.equals("edit")) {
-//                warehouse_id = getArguments().getString("warehouse");
-//                if (!helper.GetWarehouseById(warehouse_id).equals("")) {
-//                    SetWarehouseSpinner(warehouse_id);
-//                } else {
-//                    Objects.requireNonNull(getActivity()).finish();
-//                }
-//                setData(voucherNo);
+
+                    getEditData();
 
                 } else if (EditMode.equals("new")) {
                     voucherNo = "S-" + DateFormat.format("ddMMyy-HHmmss", new Date());
-                    binding.voucherNo.setText("Voucher No :" + voucherNo);
+                    binding.voucherNo.setText(String.format("Voucher No :%s", voucherNo));
+                    PublicData.voucher=voucherNo;
                     binding.date.setText(df.format(c));
                     binding.stockDate.setText(df.format(c));
-                    PublicData.date = Tools.dateFormat(df.format(c));
-                    PublicData.stock_date = Tools.dateFormat(df.format(c));
+                    PublicData.date = df.format(c);
+                    PublicData.stock_date = df.format(c);
                 }
 
 
@@ -92,7 +91,8 @@ public class StockCountHeaderFragment extends Fragment {
             binding.warehouseSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    PublicData.warehouse = list.get(adapterView.getSelectedItemPosition()).getMasterId();
+                    PublicData.warehouse = warehouseList.get(adapterView.getSelectedItemPosition()).getMasterId();
+
                 }
 
                 @Override
@@ -115,17 +115,72 @@ public class StockCountHeaderFragment extends Fragment {
             });
 
 
-
-
-
         }catch (Exception e){
             String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();
             Tools.logWrite(fnName,e,requireContext());
         }
 
+        binding.narration.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                PublicData.narration=s.toString();
+            }
+        });
+
 
 
         return binding.getRoot();
+    }
+
+    private void getEditData() {
+        try {
+
+
+        Cursor cursor = helper.GetHeaderData(iId);
+        if(cursor!=null && cursor.moveToFirst()){
+
+            PublicData.warehouse = cursor.getInt(cursor.getColumnIndex(StockHeader.I_WAREHOUSE));
+            PublicData.voucher=cursor.getString(cursor.getColumnIndex(StockHeader.S_VOUCHER_NO));
+            PublicData.date = cursor.getString(cursor.getColumnIndex(StockHeader.D_DATE));
+            PublicData.stock_date=cursor.getString(cursor.getColumnIndex(StockHeader.D_STOCK_COUNT_DATE));
+            PublicData.narration=cursor.getString(cursor.getColumnIndex(StockHeader.S_NARRATION));
+            binding.voucherNo.setText(String.format("Voucher No :%s", cursor.getString(cursor.getColumnIndex(StockHeader.S_VOUCHER_NO))));
+            binding.date.setText(cursor.getString(cursor.getColumnIndex(StockHeader.D_DATE)));
+            binding.stockDate.setText(cursor.getString(cursor.getColumnIndex(StockHeader.D_STOCK_COUNT_DATE)));
+            binding.narration.setText(cursor.getString(cursor.getColumnIndex(StockHeader.S_NARRATION)));
+
+            if (!helper.GetWarehouseById(cursor.getString(cursor.getColumnIndex(StockHeader.I_WAREHOUSE))).equals("")) {
+                SetWarehouseSpinner(cursor.getInt(cursor.getColumnIndex(StockHeader.I_WAREHOUSE)));
+            } else {
+                requireActivity().finish();
+            }
+        }
+        }catch (Exception e){
+            String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();
+            Tools.logWrite(fnName,e, requireContext());
+        }
+
+    }
+
+    private void SetWarehouseSpinner(int warehouse_id) {
+        if(warehouseList.size()!=0){
+            for(int i = 0;i<warehouseList.size();i++){
+                if(warehouseList.get(i).getMasterId()==(warehouse_id)){
+                    binding.warehouseSpinner.setSelection(i);
+                }
+            }
+        }
     }
 
     private void datePick(EditText date, String publicDate) {
@@ -141,9 +196,9 @@ public class StockCountHeaderFragment extends Fragment {
                         year;
                 date.setText(StringDate);
                 if(publicDate.equals("date")){
-                PublicData.date=Tools.dateFormat(StringDate);
+                PublicData.date=StringDate;
                 }else {
-                    PublicData.stock_date=Tools.dateFormat(StringDate);
+                    PublicData.stock_date=StringDate;
                 }
 
                 Log.d("public_Date", PublicData.date+" "+PublicData.stock_date);
@@ -162,11 +217,12 @@ public class StockCountHeaderFragment extends Fragment {
 
 
             Cursor cursor = helper.GetWarehouse();
-            list.clear();
+            warehouseList.clear();
             if (cursor != null) {
                 for (int i = 0; i < cursor.getCount(); i++) {
                     if (!cursor.getString(cursor.getColumnIndex("Name")).equals(" "))
-                        list.add(new Warehouse(cursor.getString(cursor.getColumnIndex("MasterId")), cursor.getString(cursor.getColumnIndex("Name"))));
+                        warehouseList.add(new Warehouse(cursor.getInt(cursor.getColumnIndex("MasterId")),
+                                cursor.getString(cursor.getColumnIndex("Name"))));
 
                     cursor.moveToNext();
                     if (cursor.getCount() == i + 1) {
@@ -184,15 +240,19 @@ public class StockCountHeaderFragment extends Fragment {
 
     private static class Warehouse {
 
-        final String MasterId;
+        final int MasterId;
         final String Name;
 
-        public Warehouse(String masterId, String name) {
+        public Warehouse(int masterId, String name) {
             MasterId = masterId;
             Name = name;
         }
 
-        public String getMasterId() {
+        public String getName() {
+            return Name;
+        }
+
+        public int getMasterId() {
             return MasterId;
         }
 

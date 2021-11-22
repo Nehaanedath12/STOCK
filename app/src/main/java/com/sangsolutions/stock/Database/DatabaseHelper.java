@@ -12,6 +12,9 @@ import android.widget.Adapter;
 
 import androidx.annotation.Nullable;
 
+import com.sangsolutions.stock.Adapter.BodyAdapter.StockBody;
+import com.sangsolutions.stock.Adapter.BodyAdapter.StockHeader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,30 +33,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     final Context context;
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Stock.db";
     private static final String TABLE_PRODUCT = "tbl_Product";
     private static final String TABLE_USER = "user";
     private static final String TABLE_CURRENT_LOGIN = "current_login";
     private static final String TABLE_WAREHOUSE = "tbl_warehouse";
-    private static final String TABLE_STOCK_COUNT = "tbl_StockCount";
-
-
-    //Product
-
-    //PendingSO
-    private static final String DOC_NO = "DocNo";
-    private static final String DOC_DATE = "DocDate";
-    private static final String HEADER_ID = "HeaderId";
-    private static final String SI_NO = "SiNo";
-    private static final String CUSTOMER = "Cusomer";//spelling is not right
-    private static final String I_CUSTOMER_ID = "iCustomer";
-    private static final String PRODUCT = "Product";
-    private static final String QTY = "Qty";
-    private static final String TEMP_QTY = "TempQty";
-
-    //tbl_DeliveryNote
-    private static final String I_STATUS = "iStatus";
+    private static final String TABLE_STOCK_COUNT_HEADER = "tbl_StockCount_Header";
+    private static final String TABLE_STOCK_COUNT_BODY = "tbl_StockCount_Body";
 
     private static final String I_ID = "iId";
     private static final String S_LOGIN_NAME = "sLoginName";
@@ -60,57 +48,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //current_login
     private static  final String USER_ID = "uId";
-
-    //stock count
-    private static  final String S_VOUCHER_NO = "sVoucherNo";
-    private static  final String D_DATE = "dDate";
-    private static  final String I_WAREHOUSE = "iWarehouse";
-    private static  final String I_PRODUCT = "iProduct";
-    private static  final String F_QTY = "fQty";
-    private static  final String S_UNIT = "sUnit";
-    private static  final String I_USER = "iUser";
-    private static  final String S_REMARKS = "sRemarks";
-    private static  final String D_PROCESSED_DATE ="dProcessedDate";
-    private static final String S_NARRATION = "sNarration";
-    private static final String D_STOCK_COUNT_DATE ="dStockCountDate";
-
-    //goods receipt header
-    private static final String I_SUPPLIER = "iSupplier";
-    private static final String S_PONO = "sPONo";
-
-    //goods receipt body
-    private static final String S_MINOR_REMARKS = "sMinorRemarks";
-    private static final String S_DAMAGED_REMARKS = "sDamagedRemarks";
-    private static final String F_MINOR_DAMAGE_QTY = "fMinorDamageQty";
-    private static final String F_DAMAGED_QTY = "fDamagedQty";
-    private static final String F_PO_QTY = "fPOQty";
-    private static final String S_MINOR_ATTACHMENT = "sMinorAttachment";
-    private static final String S_DAMAGED_ATTACHMENT = "sDamagedAttachment";
-    private static final String I_MINOR_TYPE = "iMinorId";
-    private static final String I_DAMAGED_TYPE = "iDamagedId";
-
-    //goods receipt damage type
-    private static final String S_NAME  = "sName";
-
-    //delivery note header
-    private static final String S_SALESMAN = "sSalesman";
-    private static final String S_CONTACT_PERSON = "sContactPerson";
-    private static final String S_SO_NOS = "sSONos";
-    private static final String I_CUSTOMER = "iCustomerRef";
-    private static final String S_DATE = "sDate";
-
-
-    //delivery note body
-    private static final String S_ITEM_CODE = "iItemCode";
-    private static final String S_DESCRIPTION = "sDescription";
-    private static final String S_ATTACHMENT = "sAttachment";
-    private static final String S_SONo = "sSONo";
-    private static final String F_SO_QTY = "sSOQty";
-    private static final String S_SONO = "sSONo";
-
-    //GRN without po header
-    private static final String S_REF_NO = "sRefNo";
-
 
     //User
     private static final String S_MENU_IDS = "sMenuIDs";
@@ -150,19 +87,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     //create table StockCount
-    private static final String CREATE_TABLE_STOCK_COUNT = "create table if not exists " + TABLE_STOCK_COUNT + " (" +
-            "" + S_VOUCHER_NO + " TEXT(30) DEFAULT null ," +
-            "" + D_DATE + "  TEXT(10) DEFAULT null," +
-            "" + D_STOCK_COUNT_DATE + "  TEXT(10) DEFAULT null," +
-            "" + I_USER + " INTEGER DEFAULT 0,"+
-            "" + I_WAREHOUSE + "  INTEGER DEFAULT 0," +
-            "" + I_PRODUCT + "  INTEGER DEFAULT 0," +
-            "" + F_QTY + "  TEXT(10) DEFAULT null," +
-            "" + S_UNIT + "  TEXT(10) DEFAULT null," +
-            "" + S_NARRATION + "  TEXT(50) DEFAULT null," +
-            "" + S_REMARKS + "  TEXT(50) DEFAULT null," +
-            "" + D_PROCESSED_DATE + "  TEXT(10) DEFAULT null," +
-            "" + I_STATUS + "  TEXT(10) DEFAULT null" +
+    private static final String CREATE_TABLE_STOCK_COUNT_HEADER = "create table if not exists " + TABLE_STOCK_COUNT_HEADER + " (" +
+            "" + StockHeader.I_ID+ " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "" +  StockHeader.S_VOUCHER_NO + " VARCHAR(50) DEFAULT null ," +
+            "" +  StockHeader.D_DATE + "  VARCHAR(20) DEFAULT null ," +
+            "" +  StockHeader.D_STOCK_COUNT_DATE + "  TEXT(10) DEFAULT null," +
+            "" +  StockHeader.I_WAREHOUSE + "  INTEGER DEFAULT 0," +
+            "" +  StockHeader.S_NARRATION + "  VARCHAR(100) DEFAULT null ," +
+            "" +  StockHeader.D_PROCESSED_DATE + "  VARCHAR(30) DEFAULT null ," +
+            "" +  StockHeader.I_STATUS + "  TEXT(10) DEFAULT null" +
+            ")";
+    private static final String CREATE_TABLE_STOCK_COUNT_BODY = "create table if not exists " + TABLE_STOCK_COUNT_BODY + " (" +
+            "" + StockBody.I_ID + " INTEGER DEFAULT 0, " +
+            "" + StockBody.I_PRODUCT + "  INTEGER DEFAULT 0," +
+            "" + StockBody.PRODUCT + "  VARCHAR(100) DEFAULT null ," +
+            "" + StockBody.BARCODE + "  VARCHAR(50) DEFAULT null ," +
+            "" + StockBody.F_QTY + " VARCHAR(20) DEFAULT null ," +
+            "" + StockBody.S_UNIT + "  VARCHAR(10) DEFAULT null ," +
+            "" + StockBody.S_REMARKS + "  VARCHAR(100) DEFAULT null " +
             ")";
 
 
@@ -186,7 +128,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_USER);
         db.execSQL(CREATE_CURRENT_LOGIN);
         db.execSQL(CREATE_TABLE_WAREHOUSE);
-        db.execSQL(CREATE_TABLE_STOCK_COUNT);
+        db.execSQL(CREATE_TABLE_STOCK_COUNT_BODY);
+        db.execSQL(CREATE_TABLE_STOCK_COUNT_HEADER);
     }
 
     @Override
@@ -274,7 +217,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (int i = 0; i < warehouseList.size(); i++) {
             ContentValues cv = new ContentValues();
 
-            cv.put(Warehouse.WAREHOUSE,warehouseList.get(i).getName() );
+            cv.put(Warehouse.I_ID,warehouseList.get(i).getMasterId() );
             cv.put(Warehouse.WAREHOUSE,warehouseList.get(i).getName());
             status = db.insert(TABLE_WAREHOUSE, null, cv);
         }
@@ -372,6 +315,176 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return cursor.getString(cursor.getColumnIndex(Product.UNIT));
         }else {
             return  "";
+        }
+    }
+
+    public boolean insertStockData(StockHeader stockHeader, List<StockBody> bodyPartList) {
+        this.db = getReadableDatabase();
+        this.db = getWritableDatabase();
+        this.db.beginTransaction();
+        float success = 0;
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(StockHeader.D_DATE, stockHeader.getdDate());
+            cv.put(StockHeader.D_PROCESSED_DATE, stockHeader.getdProcessedDate());
+            cv.put(StockHeader.D_STOCK_COUNT_DATE, stockHeader.getdStockCountDate());
+            cv.put(StockHeader.I_WAREHOUSE, stockHeader.getiWarehouse());
+            cv.put(StockHeader.S_NARRATION, stockHeader.getsNarration());
+            cv.put(StockHeader.S_VOUCHER_NO, stockHeader.getsVoucherNo());
+
+
+            long iTransId = db.insert(TABLE_STOCK_COUNT_HEADER, null, cv);
+            Log.d("stockHeaderId", iTransId + "");
+            if (iTransId != -1) {
+                for (int i = 0; i < bodyPartList.size(); i++) {
+                    ContentValues cvBody = new ContentValues();
+                    cvBody.put(StockBody.I_ID, iTransId);
+                    cvBody.put(StockBody.I_PRODUCT, bodyPartList.get(i).getiProduct());
+                    cvBody.put(StockBody.PRODUCT, bodyPartList.get(i).getName());
+                    cvBody.put(StockBody.BARCODE, bodyPartList.get(i).getBarcode());
+                    cvBody.put(StockBody.F_QTY, bodyPartList.get(i).getQty());
+                    cvBody.put(StockBody.S_UNIT, bodyPartList.get(i).getUnit());
+                    cvBody.put(StockBody.S_REMARKS, bodyPartList.get(i).getsRemarks());
+
+
+                    float status = db.insert(TABLE_STOCK_COUNT_BODY, null, cvBody);
+                    Log.d("salesBodyId", status + "");
+                }
+            }
+            this.db.setTransactionSuccessful();
+        } catch (Exception e) {
+            success=-1;
+            Log.d("salesBodyIdExce", e.getMessage() + "");
+        } finally {
+            this.db.endTransaction();
+        }
+        db.close();
+        return success != -1;
+    }
+
+    public Cursor GetStockCountList() {
+
+        this.db = getReadableDatabase();
+        Cursor cursor;
+            cursor = db.rawQuery("SELECT sVoucherNo,iWarehouse,dDate,Iid FROM "+TABLE_STOCK_COUNT_HEADER+"  GROUP BY sVoucherNo",null);
+
+        if(cursor.moveToFirst())
+            return cursor;
+        else
+            return null;
+    }
+
+    public String GetWarehouseById(String id) {
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("select " + Warehouse.WAREHOUSE + " from " + TABLE_WAREHOUSE + " where " + Warehouse.I_ID + " = ?", new String[]{id});
+
+        if (cursor.moveToFirst()) {
+            return cursor.getString(0);
+        } else {
+            return "";
+        }
+    }
+
+    public boolean DeleteStockwithId(String iId) {
+        this.db = getWritableDatabase();
+        this.db = getReadableDatabase();
+        Log.d("tbl_StockCount_Body",iId);
+
+
+        List<String >idString= Arrays.asList(iId.split(","));
+
+
+        for (int i=0;i<idString.size();i++){
+            Log.d("idString",idString.get(i)+"");
+            long delete=db.delete(TABLE_STOCK_COUNT_HEADER,StockHeader.I_ID+"=?",new String[]{idString.get(i)});
+            long deleteBody=db.delete(TABLE_STOCK_COUNT_BODY,StockBody.I_ID+"=?",new String[]{idString.get(i)});
+        }
+
+
+//        Log.d("deletedelete","delete from "+TABLE_STOCK_COUNT_HEADER+" where "+StockHeader.I_ID+" in("+iId+")");
+//        Cursor cursor = db.rawQuery("delete from "+TABLE_STOCK_COUNT_HEADER+" where "+StockHeader.I_ID+" in(28)",null);
+//        Cursor cursorbody = db.rawQuery("delete from " + TABLE_STOCK_COUNT_BODY +  " where " + StockBody.I_ID +" in(28)",null);
+
+        return true;
+    }
+
+    public Cursor GetHeaderData(int iId) {
+
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_STOCK_COUNT_HEADER + " where " + StockHeader.I_ID + " = ? ", new String[]{String.valueOf(iId)});
+        if (cursor.moveToFirst()) {
+            return cursor;
+        } else {
+            return null;
+        }
+
+    }
+
+    public Cursor GetBodyData(int iId) {
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_STOCK_COUNT_BODY+" where "+ StockBody.I_ID +" = ? ", new String[]{String.valueOf(iId)});
+        if (cursor.moveToFirst()) {
+            return cursor;
+        } else {
+            return null;
+        }
+    }
+
+    public boolean updateStockData(StockHeader stockHeader, List<StockBody> bodyPartList, int iId) {
+        this.db = getReadableDatabase();
+        this.db = getWritableDatabase();
+        this.db.beginTransaction();
+        float success = 0;
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(StockHeader.D_DATE, stockHeader.getdDate());
+            cv.put(StockHeader.D_STOCK_COUNT_DATE, stockHeader.getdStockCountDate());
+            cv.put(StockHeader.I_WAREHOUSE, stockHeader.getiWarehouse());
+            cv.put(StockHeader.S_NARRATION, stockHeader.getsNarration());
+            cv.put(StockHeader.S_VOUCHER_NO, stockHeader.getsVoucherNo());
+
+            long iTransId= db.update(TABLE_STOCK_COUNT_HEADER, cv, StockHeader.I_ID + "=?",
+                    new String[]{String.valueOf(iId)});
+
+            float delete = db.delete(TABLE_STOCK_COUNT_BODY, StockBody.I_ID + " =  ? ",
+                    new String[]{String.valueOf(iId)});
+            Log.d("stockHeaderId", iTransId + " "+delete);
+            if (iTransId != -1) {
+                for (int i = 0; i < bodyPartList.size(); i++) {
+                    ContentValues cvBody = new ContentValues();
+                    cvBody.put(StockBody.I_ID, iId);
+                    cvBody.put(StockBody.I_PRODUCT, bodyPartList.get(i).getiProduct());
+                    cvBody.put(StockBody.PRODUCT, bodyPartList.get(i).getName());
+                    cvBody.put(StockBody.BARCODE, bodyPartList.get(i).getBarcode());
+                    cvBody.put(StockBody.F_QTY, bodyPartList.get(i).getQty());
+                    cvBody.put(StockBody.S_UNIT, bodyPartList.get(i).getUnit());
+                    cvBody.put(StockBody.S_REMARKS, bodyPartList.get(i).getsRemarks());
+
+
+                    float status = db.insert(TABLE_STOCK_COUNT_BODY, null, cvBody);
+                    Log.d("salesBodyId", status + "");
+                }
+            }
+            this.db.setTransactionSuccessful();
+        } catch (Exception e) {
+            success=-1;
+            Log.d("salesBodyIdExce", e.getMessage() + "");
+        } finally {
+            this.db.endTransaction();
+        }
+        db.close();
+        return success != -1;
+    }
+
+    public Cursor GetProductInfoByBarcode(String barcode) {
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("select "+Product.I_ID+","+Product.PRODUCT+" from "+TABLE_PRODUCT+" where "+Product.BARCODE+" = ? ",new String[]{barcode});
+        if (cursor.moveToFirst()) {
+
+
+            return cursor;
+        }else {
+            return  null;
         }
     }
 }

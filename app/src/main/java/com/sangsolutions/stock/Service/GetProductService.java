@@ -6,7 +6,10 @@ import android.app.job.JobService;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -26,6 +29,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class GetProductService extends JobService {
@@ -100,6 +104,8 @@ public class GetProductService extends JobService {
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();
+                    Tools.logWrite(fnName,e,GetProductService.this);
                 }
 
                 return null;
@@ -108,6 +114,17 @@ public class GetProductService extends JobService {
             @Override
             protected void onPostExecute(Void aVoid) {
                 editor.putString(Commons.PRODUCT_FINISHED,"true").apply();
+
+                if (preferences.getString(Commons.PRODUCT_FINISHED, "false").equals("true")  &&
+                        preferences.getString(Commons.WAREHOUSE_FINISHED, "false").equals("true")  ){
+                        Log.d("insertEndStatus","success");
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
+                            public void run() {
+                                Toast.makeText(GetProductService.this, "Synced", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                }
                 jobFinished(params,false);
             }
         };

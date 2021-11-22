@@ -2,9 +2,11 @@ package com.sangsolutions.stock.Fragment;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,6 +32,7 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.sangsolutions.stock.Adapter.BodyAdapter.StockBody;
 import com.sangsolutions.stock.Adapter.BodyAdapter.BodyAdapter;
 import com.sangsolutions.stock.Adapter.ProductAdapter;
+import com.sangsolutions.stock.Adapter.Singleton.StockCountProductSingleton;
 import com.sangsolutions.stock.Adapter.UnitAdapter;
 import com.sangsolutions.stock.Database.DatabaseHelper;
 import com.sangsolutions.stock.Database.Product;
@@ -54,7 +57,6 @@ public class StockCountBodyFragment extends Fragment {
     int iId;
     String EditMode = "";
     SimpleDateFormat df;
-    Animation move_down_anim, move_up_anim;
     BodyProductAlertBinding productBinding;
     AlertDialog mainAlert;
     List<Product>productsList;
@@ -67,17 +69,20 @@ public class StockCountBodyFragment extends Fragment {
     BodyAdapter adapter;
     boolean EditProduct=false;
     int position_body_Edit=0;
+    Animation slideUp, slideDown;
+    boolean selectionActive = false;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding= BodyFrgmentBinding.inflate(getLayoutInflater());
         helper=new DatabaseHelper(requireContext());
-        move_down_anim = AnimationUtils.loadAnimation(requireActivity(), R.anim.move_down);
-        move_up_anim = AnimationUtils.loadAnimation(requireActivity(), R.anim.move_up);
 
-        binding.delete.setVisibility(View.GONE);
+        binding.fabDelete.setVisibility(View.GONE);
         binding.fabClose.setVisibility(View.GONE);
         binding.fabAdd.setVisibility(View.VISIBLE);
+        slideDown = AnimationUtils.loadAnimation(getContext(), R.anim.move_down);
+        slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.move_up);
 
         productBinding =BodyProductAlertBinding.inflate(getLayoutInflater(),null,false);
         AlertDialog.Builder builderMain=new AlertDialog.Builder(requireContext(),android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
@@ -97,14 +102,12 @@ public class StockCountBodyFragment extends Fragment {
         try {
             if (getArguments() != null) {
                 EditMode = getArguments().getString("EditMode");
-                iId = getArguments().getInt("voucherNo", 0);
+                iId = getArguments().getInt("iId", 0);
 
                 Log.d("lllllB", EditMode + " " + iId);
 
                 if (EditMode.equals("edit")) {
-
-                } else if (EditMode.equals("new")) {
-
+                    getEditData();
                 }
 
 
@@ -118,6 +121,19 @@ public class StockCountBodyFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     newAlert();
+                }
+            });
+
+            binding.fabDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    deleteAlert();
+                }
+            });
+            binding.fabClose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeSelection();
                 }
             });
 
@@ -135,7 +151,113 @@ public class StockCountBodyFragment extends Fragment {
 
     }
 
+    private void getEditData() {
+
+        try {
+
+
+        Cursor cursor = helper.GetBodyData(iId);
+        if(cursor!=null){
+            if(cursor.moveToFirst()) {
+                for (int i = 0; i < cursor.getCount(); i++) {
+                    mainList.add(new StockBody(
+                            cursor.getString(cursor.getColumnIndex(StockBody.PRODUCT)),
+                            "",
+                            cursor.getString(cursor.getColumnIndex(StockBody.F_QTY)),
+                            cursor.getString(cursor.getColumnIndex(StockBody.S_UNIT)),
+                            cursor.getString(cursor.getColumnIndex(StockBody.I_PRODUCT)),
+                            cursor.getString(cursor.getColumnIndex(StockBody.S_REMARKS)),
+                            cursor.getString(cursor.getColumnIndex(StockBody.BARCODE))
+                    ));
+                    cursor.moveToNext();
+
+                    if (cursor.getCount() == i + 1) {
+                        adapter.notifyDataSetChanged();
+                        StockCountProductSingleton.getInstance().setList(mainList);
+                        adapter.setOnClickListener(new BodyAdapter.OnClickListener() {
+                            @Override
+                            public void onItemClick(StockBody product, int pos) {
+
+                                if (!selectionActive) {
+                                    EditProduct=true;
+                                    position_body_Edit=pos;
+                                    EditProductField(product,pos);
+                                } else {
+                                    enableActionMode(pos);
+                                }
+
+
+                            }
+
+                            @Override
+                            public void onItemDeleteClickListener(int pos) {
+
+                            }
+
+                            @Override
+                            public void onItemLongClick(int pos) {
+                                enableActionMode(pos);
+                                selectionActive = true;
+                            }
+                        });
+                    }
+                }
+            }else {
+                requireActivity().finish();
+                Log.d("error","Body have no data to load!");
+            }
+        }
+        }catch (Exception e){
+            String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();
+            Tools.logWrite(fnName,e, requireContext());
+        }
+    }
+
+    private void deleteAlert() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
+        builder.setTitle("Delete?")
+                .setMessage("Do you want to Delete " + adapter.getSelectedItemCount() + " items?")
+                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DeleteItems();
+                    }
+                })
+                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create()
+                .show();
+    }
+
+    private void DeleteItems() {
+
+        List<Integer> listSelectedItem = adapter.getSelectedItems();
+        for (int i =listSelectedItem.size()-1;i>=0;i--) {
+            for (int j =mainList.size()-1;j>=0;j--) {
+                if (listSelectedItem.get(i) == j) {
+                    Log.d("listSelectedItem",j+" "+mainList.get(j).getName());
+                    mainList.remove(j);
+                }
+            }
+
+            if (i + 1 == listSelectedItem.size()) {
+                adapter.notifyDataSetChanged();
+                binding.rvProduct.setAdapter(adapter);
+                StockCountProductSingleton.getInstance().setList(mainList);
+                closeSelection();
+            }
+//            settingBottomBar();
+        }
+    }
+
     private void newAlert() {
+
+        try {
+
 
         mainAlert.show();
         productBinding.product.addTextChangedListener(new TextWatcher() {
@@ -181,6 +303,7 @@ public class StockCountBodyFragment extends Fragment {
             public void onClick(View v) {
                 mainAlert.dismiss();
                 EditProduct=false;
+                clearBody();
             }
         });
 
@@ -199,6 +322,10 @@ public class StockCountBodyFragment extends Fragment {
                 }
             }
         });
+        }catch (Exception e){
+            String fnName=new Object() {}.getClass().getName()+"."+ Objects.requireNonNull(new Object() {}.getClass().getEnclosingMethod()).getName();
+            Tools.logWrite(fnName,e, requireContext());
+        }
 
     }
 
@@ -227,9 +354,15 @@ public class StockCountBodyFragment extends Fragment {
             @Override
             public void onItemClick(StockBody product, int pos) {
 
-                EditProduct=true;
-                position_body_Edit=pos;
-                EditProductField(product,pos);
+                if (!selectionActive) {
+                    EditProduct=true;
+                    position_body_Edit=pos;
+                    EditProductField(product,pos);
+                } else {
+                    enableActionMode(pos);
+                }
+
+
             }
 
             @Override
@@ -239,12 +372,59 @@ public class StockCountBodyFragment extends Fragment {
 
             @Override
             public void onItemLongClick(int pos) {
-
+                enableActionMode(pos);
+                selectionActive = true;
             }
         });
 
 
 
+    }
+
+    private void enableActionMode(int position) {
+        toggleSelection(position);
+    }
+
+    private void toggleSelection(int position) {
+        adapter.toggleSelection(position);
+        int count = adapter.getSelectedItemCount();
+
+        if (count == 1 && binding.fabDelete.getVisibility() != View.VISIBLE) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    binding.fabDelete.startAnimation(slideUp);
+                    binding.fabClose.startAnimation(slideUp);
+                    binding.fabAdd.startAnimation(slideDown);
+                    binding.fabDelete.setVisibility(View.VISIBLE);
+                    binding.fabClose.setVisibility(View.VISIBLE);
+                    binding.fabAdd.setVisibility(View.GONE);
+                }
+            }, 300);
+        }
+
+        if (count == 0) {
+            closeSelection();
+        }
+    }
+
+    private void closeSelection() {
+
+        adapter.clearSelections();
+        binding.fabDelete.startAnimation(slideDown);
+        binding.fabClose.startAnimation(slideDown);
+        binding.fabAdd.startAnimation(slideUp);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                binding.fabDelete.setVisibility(View.GONE);
+                binding.fabClose.setVisibility(View.GONE);
+                binding.fabAdd.setVisibility(View.VISIBLE);
+            }
+        }, 300);
+        selectionActive = false;
     }
 
     private void EditProductField(StockBody product, int pos) {
@@ -255,7 +435,7 @@ public class StockCountBodyFragment extends Fragment {
         productBinding.barcode.setText(product.getBarcode());
         productBinding.qty.setText(product.getQty());
         productBinding.remarks.setText(product.getsRemarks());
-        SetUnit(product.getUnit(),pos);
+        SetUnit(helper.GetProductUnit(product.getBarcode()),pos);
 
     }
 
@@ -267,6 +447,7 @@ public class StockCountBodyFragment extends Fragment {
         productBinding.product.setText("");
         productBinding.product.requestFocus();
         SetUnit("",-1);
+        StockCountProductSingleton.getInstance().setList(mainList);
     }
 
     private void barcodeScanningChecking() {
@@ -342,7 +523,15 @@ public class StockCountBodyFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         productBinding.barcode.setText(barcode.valueAt(0).displayValue);
                         SetUnit(helper.GetProductUnit(barcode.valueAt(0).displayValue),-1);
+                        Cursor cursor = helper.GetProductInfoByBarcode(barcode.valueAt(0).displayValue);
 
+                        if(cursor !=null && cursor.moveToFirst()){
+                            iProduct=cursor.getInt(cursor.getColumnIndex(Product.I_ID));
+                            productBinding.product.setText(cursor.getString(cursor.getColumnIndex(Product.PRODUCT)));
+                            productBinding.product.dismissDropDown();
+                            productBinding.qty.requestFocus();
+                            productBinding.surfaceView.setVisibility(View.GONE);
+                        }
                     });
                 }
             }
@@ -373,6 +562,7 @@ public class StockCountBodyFragment extends Fragment {
                             productBinding.barcode.setText("");
                             iProduct=product.getMasterId();
                             productBinding.product.setText(product.getName());
+                            productBinding.qty.requestFocus();
                             productBinding.barcode.setText(product.getBarcode());
                             productBinding.product.dismissDropDown();
                             SetUnit(product.getUnit(), -1);
