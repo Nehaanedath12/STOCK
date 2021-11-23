@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -21,7 +20,6 @@ import com.sangsolutions.stock.Adapter.StockHistoryAdapter.StockCountList;
 import com.sangsolutions.stock.Adapter.StockHistoryAdapter.StockCountListAdapter;
 import com.sangsolutions.stock.Database.DatabaseHelper;
 import com.sangsolutions.stock.R;
-import com.sangsolutions.stock.Service.GetProductService;
 import com.sangsolutions.stock.Tools;
 import com.sangsolutions.stock.databinding.ActivityStockAllocationHistoryBinding;
 
@@ -62,30 +60,17 @@ public class StockAllocationHistoryActivity extends AppCompatActivity {
         binding.fabDelete.setVisibility(View.GONE);
         binding.fabClose.setVisibility(View.GONE);
 
-        binding.add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(getApplicationContext(), StockAllocationActivity.class);
-                intent.putExtra("EditMode", "new");
-                intent.putExtra("iId",0);
+        binding.add.setOnClickListener(v -> {
+            Intent intent=new Intent(getApplicationContext(), StockAllocationActivity.class);
+            intent.putExtra("EditMode", "new");
+            intent.putExtra("iId",0);
 
-                startActivity(intent);
-            }
+            startActivity(intent);
         });
 
 
-        binding.fabClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                closeSelection();
-            }
-        });
-        binding.fabDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deleteAlert();
-            }
-        });
+        binding.fabClose.setOnClickListener(view1 -> closeSelection());
+        binding.fabDelete.setOnClickListener(view12 -> deleteAlert());
     }
 
     private void deleteAlert() {
@@ -93,19 +78,8 @@ public class StockAllocationHistoryActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete?")
                 .setMessage("Do you want to Delete " + adapter.getSelectedItemCount() + " items?")
-                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        DeleteItems();
-
-                    }
-                })
-                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setPositiveButton("YES", (dialog, which) -> DeleteItems())
+                .setNegativeButton("NO", (dialog, which) -> dialog.dismiss())
                 .create()
                 .show();
     }
@@ -142,7 +116,7 @@ public class StockAllocationHistoryActivity extends AppCompatActivity {
 
 
         list.clear();
-        Cursor cursor = helper.GetStockCountList();
+        Cursor cursor = helper.GetStockCountHeader();
         if (cursor != null) {
             cursor.moveToFirst();
             binding.emptyFrame.setVisibility(View.GONE);
@@ -170,18 +144,8 @@ public class StockAllocationHistoryActivity extends AppCompatActivity {
                             androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(StockAllocationHistoryActivity.this);
                             builder.setTitle("Delete?")
                                     .setMessage("Do you want to Delete this item?")
-                                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            deleteFromDB(String.valueOf(stockCountList.getiId()));
-                                        }
-                                    })
-                                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    })
+                                    .setPositiveButton("YES", (dialog, which) -> deleteFromDB(String.valueOf(stockCountList.getiId())))
+                                    .setNegativeButton("NO", (dialog, which) -> dialog.dismiss())
                                     .create()
                                     .show();
                         }
@@ -229,15 +193,12 @@ public class StockAllocationHistoryActivity extends AppCompatActivity {
 
         if (count == 1 && binding.fabDelete.getVisibility() != View.VISIBLE) {
             final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
+            handler.postDelayed(() -> {
 
-                    binding.fabDelete.startAnimation(slideUp);
-                    binding.fabClose.startAnimation(slideUp);
-                    binding.fabDelete.setVisibility(View.VISIBLE);
-                    binding.fabClose.setVisibility(View.VISIBLE);
-                }
+                binding.fabDelete.startAnimation(slideUp);
+                binding.fabClose.startAnimation(slideUp);
+                binding.fabDelete.setVisibility(View.VISIBLE);
+                binding.fabClose.setVisibility(View.VISIBLE);
             }, 300);
         }
 
@@ -252,12 +213,9 @@ public class StockAllocationHistoryActivity extends AppCompatActivity {
         binding.fabDelete.startAnimation(slideDown);
         binding.fabClose.startAnimation(slideDown);
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                binding.fabDelete.setVisibility(View.GONE);
-                binding.fabClose.setVisibility(View.GONE);
-            }
+        handler.postDelayed(() -> {
+            binding.fabDelete.setVisibility(View.GONE);
+            binding.fabClose.setVisibility(View.GONE);
         }, 300);
         selectionActive = false;
     }

@@ -30,7 +30,13 @@ public class LoginActivity extends AppCompatActivity {
         preferences = getSharedPreferences("sync",MODE_PRIVATE);
         helper=new DatabaseHelper(this);
 
-        binding.settings.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this,SetIPActivity.class)));
+
+        binding.settings.setOnClickListener(v -> {
+            Intent intent=new Intent(LoginActivity.this, SetIPActivity.class);
+            intent.putExtra("iType",1);
+            startActivity(intent);
+        });
+
 
         if (helper.GetLoginStatus()) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -49,55 +55,52 @@ public class LoginActivity extends AppCompatActivity {
             binding.passShow.setVisibility(View.GONE);
             binding.password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
         });
-        binding.login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("preferences1",preferences.getString(Commons.PRODUCT_FINISHED, "false")+"  "+
-                        preferences.getString(Commons.WAREHOUSE_FINISHED, "false"));
-                if(!(new Tools().getIP(LoginActivity.this)).isEmpty()) {
+        binding.login.setOnClickListener(v -> {
+            Log.d("preferences1",preferences.getString(Commons.PRODUCT_FINISHED, "false")+"  "+
+                    preferences.getString(Commons.WAREHOUSE_FINISHED, "false"));
+            if(!(new Tools().getIP(LoginActivity.this)).isEmpty()) {
 
-                if(preferences.getString(Commons.PRODUCT_FINISHED, "false").equals("true") &&
-                        preferences.getString(Commons.WAREHOUSE_FINISHED, "false").equals("true") ){
-                    if(!binding.userName.getText().toString().trim().isEmpty()) {
-                        if (!binding.password.getText().toString().trim().isEmpty()) {
+            if(preferences.getString(Commons.PRODUCT_FINISHED, "false").equals("true") &&
+                    preferences.getString(Commons.WAREHOUSE_FINISHED, "false").equals("true") ){
+                if(!binding.userName.getText().toString().trim().isEmpty()) {
+                    if (!binding.password.getText().toString().trim().isEmpty()) {
 
-                                User u = new User();
-                                u.setsLoginName(binding.userName.getText().toString().trim());
-                                u.setsPassword(binding.password.getText().toString().trim());
+                            User u = new User();
+                            u.setsLoginName(binding.userName.getText().toString().trim());
+                            u.setsPassword(binding.password.getText().toString().trim());
 
-                                if (helper.GetUser()) {
-                                    if (helper.loginUser(u)!=null&& helper.loginUser(u).getCount()>0) {
+                            if (helper.GetUser()) {
+                                if (helper.loginUser(u)!=null&& helper.loginUser(u).getCount()>0) {
 
-                                        boolean status = helper.InsertCurrentLoginUser(u);
-                                        if(status){
-                                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                            finish();
-                                        } else {
-                                            Toast.makeText(LoginActivity.this, "An unexpected error occurred!", Toast.LENGTH_SHORT).show();
-                                        }
-
+                                    boolean status = helper.InsertCurrentLoginUser(u);
+                                    if(status){
+                                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                        finish();
                                     } else {
-                                            Toast.makeText(LoginActivity.this, "enter correct username and password", Toast.LENGTH_SHORT).show();
-                                        }
+                                        Toast.makeText(LoginActivity.this, "An unexpected error occurred!", Toast.LENGTH_SHORT).show();
+                                    }
+
                                 } else {
-                                    Toast.makeText(LoginActivity.this, "Check your network or IP", Toast.LENGTH_SHORT).show();
-                                }
+                                        Toast.makeText(LoginActivity.this, "enter correct username and password", Toast.LENGTH_SHORT).show();
+                                    }
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Check your network or IP", Toast.LENGTH_SHORT).show();
+                            }
 
 
-                        }
-                        else {
-                            binding.password.setError("enter Password");
-                        }
                     }
                     else {
-                        binding.userName.setError("enter Username");
+                        binding.password.setError("enter Password");
                     }
-                }else {
-                    Toast.makeText(LoginActivity.this, "Sync Not Completed!", Toast.LENGTH_SHORT).show();
                 }
-                } else {
-                    Toast.makeText(LoginActivity.this, "Please enter IP Address", Toast.LENGTH_SHORT).show();
+                else {
+                    binding.userName.setError("enter Username");
                 }
+            }else {
+                Toast.makeText(LoginActivity.this, "Please wait until sync complete!", Toast.LENGTH_SHORT).show();
+            }
+            } else {
+                Toast.makeText(LoginActivity.this, "Please enter IP Address", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -14,16 +14,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.STOCK"
         android:usesCleartextTraffic="true">
-        <activity android:name=".StockAllocation.StockAllocationActivity"></activity>
-        <activity android:name=".StockAllocation.StockAllocationHistoryActivity" />
-        <activity
-            android:name=".SetIPActivity"
+        <activity android:name=".Report.ReportActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity android:name=".Report.ReportSelectionActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity android:name=".StockAllocation.StockAllocationActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity android:name=".StockAllocation.StockAllocationHistoryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity android:name=".LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".MainActivity"
+        <activity android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".LoginActivity"
+        <activity android:name=".SetIPActivity"
             android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

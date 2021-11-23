@@ -18,7 +18,7 @@ android {
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        setProperty("archivesBaseName","SangDucon_"+versionName)
+        setProperty("archivesBaseName","Stock_"+versionName)
     }
 
     buildTypes {

@@ -35,12 +35,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Stock.db";
-    private static final String TABLE_PRODUCT = "tbl_Product";
-    private static final String TABLE_USER = "user";
-    private static final String TABLE_CURRENT_LOGIN = "current_login";
-    private static final String TABLE_WAREHOUSE = "tbl_warehouse";
-    private static final String TABLE_STOCK_COUNT_HEADER = "tbl_StockCount_Header";
-    private static final String TABLE_STOCK_COUNT_BODY = "tbl_StockCount_Body";
+    private static final String TABLE_PRODUCT = "t_m_Product";
+    private static final String TABLE_USER = "t_s_User";
+    private static final String TABLE_CURRENT_LOGIN = "t_s_current_login";
+    private static final String TABLE_WAREHOUSE = "t_m_warehouse";
+    private static final String TABLE_STOCK_COUNT_HEADER = "t_t_StockCountHeader";
+    private static final String TABLE_STOCK_COUNT_BODY = "t_t_StockCountBody";
 
     private static final String I_ID = "iId";
     private static final String S_LOGIN_NAME = "sLoginName";
@@ -362,11 +362,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return success != -1;
     }
 
-    public Cursor GetStockCountList() {
+    public Cursor GetStockCountHeader() {
 
         this.db = getReadableDatabase();
         Cursor cursor;
-            cursor = db.rawQuery("SELECT sVoucherNo,iWarehouse,dDate,Iid FROM "+TABLE_STOCK_COUNT_HEADER+"  GROUP BY sVoucherNo",null);
+            cursor = db.rawQuery("SELECT * FROM "+TABLE_STOCK_COUNT_HEADER,null);
 
         if(cursor.moveToFirst())
             return cursor;
@@ -487,4 +487,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return  null;
         }
     }
+
+    public String GetUserId() {
+        this.db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + TABLE_CURRENT_LOGIN, null);
+        if (cursor.moveToFirst()) {
+            String UserId = cursor.getString(cursor.getColumnIndex(USER_ID));
+            cursor.close();
+            return UserId;
+        }
+        else {
+            cursor.close();
+            return null;
+        }
+    }
+
+
 }

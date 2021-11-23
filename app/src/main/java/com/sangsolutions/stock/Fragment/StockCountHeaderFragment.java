@@ -1,5 +1,6 @@
 package com.sangsolutions.stock.Fragment;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ public class StockCountHeaderFragment extends Fragment {
     WarehouseAdapter adapter;
     String EditMode = "";
     SimpleDateFormat df;
+    @SuppressLint("SimpleDateFormat")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -65,10 +67,7 @@ public class StockCountHeaderFragment extends Fragment {
                 EditMode = getArguments().getString("EditMode");
                 iId = getArguments().getInt("iId", 0);
 
-                Log.d("lllllH", EditMode + " " + iId);
-
                 if (EditMode.equals("edit")) {
-
                     getEditData();
 
                 } else if (EditMode.equals("new")) {
@@ -101,18 +100,8 @@ public class StockCountHeaderFragment extends Fragment {
                 }
             });
 
-            binding.date.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    datePick(binding.date,"date");
-                }
-            });
-            binding.stockDate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    datePick(binding.stockDate,"stockDate");
-                }
-            });
+            binding.date.setOnClickListener(v -> datePick(binding.date,"date"));
+            binding.stockDate.setOnClickListener(v -> datePick(binding.stockDate,"stockDate"));
 
 
         }catch (Exception e){

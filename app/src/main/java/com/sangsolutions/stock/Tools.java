@@ -42,8 +42,8 @@ SharedPreferences.Editor editor;
     }
 
     public static String dateFormat(String dateToFormat){
-        DateFormat originalFormat = new SimpleDateFormat("dd-MM-yyyy");
-        DateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd");
+        @SuppressLint("SimpleDateFormat") DateFormat originalFormat = new SimpleDateFormat("dd-MM-yyyy");
+        @SuppressLint("SimpleDateFormat") DateFormat targetFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
         try {
             date = originalFormat.parse(dateToFormat);
@@ -54,8 +54,8 @@ SharedPreferences.Editor editor;
     }
 
     public static String dateFormat2(String dateToFormat){
-        DateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
-        DateFormat targetFormat = new SimpleDateFormat("dd-MM-yyyy");
+        @SuppressLint("SimpleDateFormat") DateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
+        @SuppressLint("SimpleDateFormat") DateFormat targetFormat = new SimpleDateFormat("dd-MM-yyyy");
         Date date = null;
         try {
             date = originalFormat.parse(dateToFormat);
@@ -69,7 +69,7 @@ SharedPreferences.Editor editor;
 
         Log.d("logWriteException",exception.toString());
         if(Tools.isConnected(context)) {
-//            try {
+            try {
 //                FirebaseCrashlytics.getInstance().recordException(exception);
 //                AndroidNetworking.get("http://" + new Tools().getIP(context) + URLs.LogCreate)
 //                        .addQueryParameter("logmessage", fnName)
@@ -88,9 +88,9 @@ SharedPreferences.Editor editor;
 //
 //                            }
 //                        });
-//            }catch (Exception e){
-//                e.printStackTrace();
-//            }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

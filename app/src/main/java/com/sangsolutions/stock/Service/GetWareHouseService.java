@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi;
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
 import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONArrayRequestListener;
 import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.sangsolutions.stock.Commons;
 import com.sangsolutions.stock.Database.DatabaseHelper;
@@ -55,9 +56,9 @@ public class GetWareHouseService extends JobService {
         AndroidNetworking.get("http://"+new Tools().getIP(this)+ URLs.GetWarehouse)
                 .setPriority(Priority.MEDIUM)
                 .build()
-                .getAsJSONObject(new JSONObjectRequestListener() {
+                .getAsJSONArray(new JSONArrayRequestListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
                         asyncWareHose(response);
                     }
 
@@ -69,7 +70,7 @@ public class GetWareHouseService extends JobService {
                 });
     }
 
-    private void asyncWareHose(JSONObject response) {
+    private void asyncWareHose(JSONArray response) {
 
         @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
 
@@ -81,7 +82,7 @@ public class GetWareHouseService extends JobService {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    JSONArray jsonArray = new JSONArray(response.getString("Warehouse"));
+                    JSONArray jsonArray = new JSONArray(response.toString());
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         Warehouse w=new Warehouse();

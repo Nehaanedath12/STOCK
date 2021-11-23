@@ -37,6 +37,7 @@ public class SetIPActivity extends AppCompatActivity {
     DatabaseHelper helper;
     SharedPreferences.Editor editor;
     SharedPreferences preferences;
+    int iType=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,33 +50,44 @@ public class SetIPActivity extends AppCompatActivity {
         builder.setView(view1);
         builder.setCancelable(false);
         alertDialog = builder.create();
+
+        iType=getIntent().getIntExtra("iType",0);
+
         helper=new DatabaseHelper(this);
         preferences = getSharedPreferences(Commons.PREFERENCE_SYNC,MODE_PRIVATE);
         editor = preferences.edit();
 
 
+
+
         tools = new Tools();
         if(!new Tools().getIP(this).isEmpty()){
             binding.ipAddress.setText(tools.getIP(this));
+            if(iType==0){
+                if(helper.GetLoginStatus()) {
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                    finish();
+                }else {
+                    startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                    finish();
+                }
+            }
+
         }
 
 
-        binding.save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        binding.save.setOnClickListener(view2 -> {
 
-                if (binding.ipAddress.getText().toString().trim().equals("")) {
-                    Toast.makeText(SetIPActivity.this, "Enter Ip Address", Toast.LENGTH_SHORT).show();
-                } else if (Tools.isConnected(SetIPActivity.this)) {
-                    alertDialog.show();
-                    GetUsers();
-                }else {
-                    Toast.makeText(SetIPActivity.this, "Please try when You are Online", Toast.LENGTH_SHORT).show();
-                }
-
-
-
+            if (binding.ipAddress.getText().toString().trim().equals("")) {
+                Toast.makeText(SetIPActivity.this, "Enter Ip Address", Toast.LENGTH_SHORT).show();
+            } else if (Tools.isConnected(SetIPActivity.this)) {
+                alertDialog.show();
+                GetUsers();
+            }else {
+                Toast.makeText(SetIPActivity.this, "Please try when You are Online", Toast.LENGTH_SHORT).show();
             }
+
+
 
         });
 
@@ -88,13 +100,12 @@ public class SetIPActivity extends AppCompatActivity {
             AndroidNetworking.get("http://"+  binding.ipAddress.getText().toString().trim()+ URLs.GetUser)
                     .setPriority(Priority.MEDIUM)
                     .build()
-                    .getAsJSONObject(new JSONObjectRequestListener() {
+                    .getAsJSONArray(new JSONArrayRequestListener() {
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                         @Override
-                        public void onResponse(JSONObject response) {
+                        public void onResponse(JSONArray response) {
                             Log.d("responseUser",response.toString());
                             loadData(response);
-
                         }
 
                         @Override
@@ -113,11 +124,11 @@ public class SetIPActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void loadData(JSONObject response) {
+    private void loadData(JSONArray response) {
 
         User u = new User();
         try {
-            JSONArray jsonArray = new JSONArray(response.getString("Users"));
+            JSONArray jsonArray = new JSONArray(response.toString());
             if(helper.DeleteUser()) {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);

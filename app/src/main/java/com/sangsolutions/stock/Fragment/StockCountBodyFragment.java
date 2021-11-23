@@ -52,11 +52,8 @@ public class StockCountBodyFragment extends Fragment {
 
     BodyFrgmentBinding binding;
     DatabaseHelper helper;
-    String voucherNo;
-    java.util.Date c;
     int iId;
     String EditMode = "";
-    SimpleDateFormat df;
     BodyProductAlertBinding productBinding;
     AlertDialog mainAlert;
     List<Product>productsList;
@@ -117,25 +114,10 @@ public class StockCountBodyFragment extends Fragment {
             }
 
 
-            binding.fabAdd.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    newAlert();
-                }
-            });
+            binding.fabAdd.setOnClickListener(v -> newAlert());
 
-            binding.fabDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    deleteAlert();
-                }
-            });
-            binding.fabClose.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    closeSelection();
-                }
-            });
+            binding.fabDelete.setOnClickListener(v -> deleteAlert());
+            binding.fabClose.setOnClickListener(v -> closeSelection());
 
 
 
@@ -152,10 +134,7 @@ public class StockCountBodyFragment extends Fragment {
     }
 
     private void getEditData() {
-
         try {
-
-
         Cursor cursor = helper.GetBodyData(iId);
         if(cursor!=null){
             if(cursor.moveToFirst()) {
@@ -217,18 +196,8 @@ public class StockCountBodyFragment extends Fragment {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
         builder.setTitle("Delete?")
                 .setMessage("Do you want to Delete " + adapter.getSelectedItemCount() + " items?")
-                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        DeleteItems();
-                    }
-                })
-                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setPositiveButton("YES", (dialog, which) -> DeleteItems())
+                .setNegativeButton("NO", (dialog, which) -> dialog.dismiss())
                 .create()
                 .show();
     }
@@ -250,15 +219,12 @@ public class StockCountBodyFragment extends Fragment {
                 StockCountProductSingleton.getInstance().setList(mainList);
                 closeSelection();
             }
-//            settingBottomBar();
         }
     }
 
     private void newAlert() {
 
         try {
-
-
         mainAlert.show();
         productBinding.product.addTextChangedListener(new TextWatcher() {
             @Override
@@ -291,35 +257,28 @@ public class StockCountBodyFragment extends Fragment {
         }
 
 
-        productBinding.barcodeI.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                barcodeScanningChecking();
-            }
+        productBinding.barcodeI.setOnClickListener(v -> barcodeScanningChecking());
+
+        productBinding.closeAlert.setOnClickListener(v -> {
+            mainAlert.dismiss();
+            EditProduct=false;
+            clearBody();
         });
 
-        productBinding.closeAlert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainAlert.dismiss();
-                EditProduct=false;
-                clearBody();
-            }
-        });
-
-        productBinding.add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(iProduct!=0 && !productBinding.product.getText().toString().trim().equals("")){
-                    if(!productBinding.qty.getText().toString().trim().equals("")){
-
+        productBinding.add.setOnClickListener(v -> {
+            if(iProduct!=0 && !productBinding.product.getText().toString().trim().equals("")){
+                if(!productBinding.qty.getText().toString().trim().equals("")){
+                    String sUnit=productBinding.unit.getSelectedItem().toString();
+                    if(!sUnit.trim().equals("")){
                         addProduct();
                     }else {
-                        productBinding.qty.setError("Empty");
+                        Toast.makeText(requireContext(), "Select Unit", Toast.LENGTH_SHORT).show();
                     }
                 }else {
-                    productBinding.product.setError("Empty");
+                    productBinding.qty.setError("Enter Valid Qty");
                 }
+            }else {
+                productBinding.product.setError("Enter Valid Product");
             }
         });
         }catch (Exception e){
@@ -391,16 +350,13 @@ public class StockCountBodyFragment extends Fragment {
 
         if (count == 1 && binding.fabDelete.getVisibility() != View.VISIBLE) {
             final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    binding.fabDelete.startAnimation(slideUp);
-                    binding.fabClose.startAnimation(slideUp);
-                    binding.fabAdd.startAnimation(slideDown);
-                    binding.fabDelete.setVisibility(View.VISIBLE);
-                    binding.fabClose.setVisibility(View.VISIBLE);
-                    binding.fabAdd.setVisibility(View.GONE);
-                }
+            handler.postDelayed(() -> {
+                binding.fabDelete.startAnimation(slideUp);
+                binding.fabClose.startAnimation(slideUp);
+                binding.fabAdd.startAnimation(slideDown);
+                binding.fabDelete.setVisibility(View.VISIBLE);
+                binding.fabClose.setVisibility(View.VISIBLE);
+                binding.fabAdd.setVisibility(View.GONE);
             }, 300);
         }
 
@@ -416,13 +372,10 @@ public class StockCountBodyFragment extends Fragment {
         binding.fabClose.startAnimation(slideDown);
         binding.fabAdd.startAnimation(slideUp);
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                binding.fabDelete.setVisibility(View.GONE);
-                binding.fabClose.setVisibility(View.GONE);
-                binding.fabAdd.setVisibility(View.VISIBLE);
-            }
+        handler.postDelayed(() -> {
+            binding.fabDelete.setVisibility(View.GONE);
+            binding.fabClose.setVisibility(View.GONE);
+            binding.fabAdd.setVisibility(View.VISIBLE);
         }, 300);
         selectionActive = false;
     }
@@ -556,17 +509,14 @@ public class StockCountBodyFragment extends Fragment {
                         productsAdapter.notifyDataSetChanged();
                     }
 
-                    productsAdapter.setOnClickListener(new ProductAdapter.OnClickListener() {
-                        @Override
-                        public void onItemClick(Product product, int position) {
-                            productBinding.barcode.setText("");
-                            iProduct=product.getMasterId();
-                            productBinding.product.setText(product.getName());
-                            productBinding.qty.requestFocus();
-                            productBinding.barcode.setText(product.getBarcode());
-                            productBinding.product.dismissDropDown();
-                            SetUnit(product.getUnit(), -1);
-                        }
+                    productsAdapter.setOnClickListener((product, position) -> {
+                        productBinding.barcode.setText("");
+                        iProduct=product.getMasterId();
+                        productBinding.product.setText(product.getName());
+                        productBinding.qty.requestFocus();
+                        productBinding.barcode.setText(product.getBarcode());
+                        productBinding.product.dismissDropDown();
+                        SetUnit(product.getUnit(), -1);
                     });
 
                 }
